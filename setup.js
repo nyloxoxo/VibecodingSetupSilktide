@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const windowsOptions = document.querySelector('.windows-options');
     const recommendedSoftware = document.querySelectorAll('.recommended-software');
     const optionalSoftware = document.querySelectorAll('.optional-software');
+    const validationModal = document.getElementById('validationModal');
 
     // Software download URLs
     const downloadUrls = {
@@ -70,6 +71,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
+    // Account creation URLs
+    const accountUrls = {
+        github: 'https://github.com/signup',
+        cursor: 'https://cursor.sh/login',
+        docker: 'https://hub.docker.com/signup'
+    };
+
     // Handle OS type change
     osTypeRadios.forEach(radio => {
         radio.addEventListener('change', function() {
@@ -88,6 +96,88 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Form validation function
+    function validateForm() {
+        let isValid = true;
+        let errorMessage = "Please address the following issues:";
+        
+        // Reset previous errors
+        const osSection = document.getElementById('osSection');
+        const installModeSection = document.getElementById('installModeSection');
+        const osErrorMessage = document.getElementById('osErrorMessage');
+        const softwareErrorMessage = document.getElementById('softwareErrorMessage');
+        
+        osSection.classList.remove('error');
+        installModeSection.classList.remove('error');
+        osErrorMessage.classList.remove('visible');
+        softwareErrorMessage.classList.remove('visible');
+        osVersionSelect.classList.remove('error');
+        
+        // Validate OS selection
+        if (!osVersionSelect.value) {
+            isValid = false;
+            osSection.classList.add('error');
+            osVersionSelect.classList.add('error');
+            osErrorMessage.classList.add('visible');
+            errorMessage += "\n- Select your OS version";
+        }
+        
+        // Validate software selection
+        const selectedSoftware = document.querySelectorAll('input[name="software"]:checked');
+        if (selectedSoftware.length === 0) {
+            isValid = false;
+            installModeSection.classList.add('error');
+            softwareErrorMessage.classList.add('visible');
+            errorMessage += "\n- Select at least one software to install";
+        }
+        
+        // Validate email if provided
+        const emailInput = document.getElementById('email');
+        const emailErrorMessage = document.getElementById('emailErrorMessage');
+        
+        if (emailInput.value && !isValidEmail(emailInput.value)) {
+            isValid = false;
+            emailInput.classList.add('error');
+            emailErrorMessage.classList.add('visible');
+            errorMessage += "\n- Enter a valid email address";
+        }
+        
+        // Show validation modal if there are errors
+        if (!isValid) {
+            const validationMessage = document.getElementById('validationMessage');
+            validationMessage.textContent = errorMessage;
+            validationModal.classList.add('visible');
+        }
+        
+        return isValid;
+    }
+    
+    // Email validation helper
+    function isValidEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+
+    // Local storage for user data
+    function saveUserData() {
+        if (document.getElementById('saveUserData').checked) {
+            const userData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                company: document.getElementById('company').value,
+                githubUsername: document.getElementById('githubUsername').value,
+                githubAccountType: document.getElementById('githubAccountType').value,
+                cursorUsername: document.getElementById('cursorUsername').value,
+                cursorPlan: document.getElementById('cursorPlan').value,
+                dockerUsername: document.getElementById('dockerUsername').value,
+                dockerSubscription: document.getElementById('dockerSubscription').value
+            };
+            
+            localStorage.setItem('userData', JSON.stringify(userData));
+        }
+    }
+
     // Start setup process
     startSetupBtn.addEventListener('click', function() {
         // Get form data
@@ -97,6 +187,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const installMode = formData.get('install_mode');
         const downloadMode = formData.get('download_mode');
         
+        // Validate the form
+        if (!validateForm()) {
+            return;
+        }
+        
         // Get all checked software
         const selectedSoftware = [];
         const softwareCheckboxes = document.querySelectorAll('input[name="software"]:checked');
@@ -104,17 +199,8 @@ document.addEventListener('DOMContentLoaded', function() {
             selectedSoftware.push(checkbox.value);
         });
         
-        // Validate OS version selection
-        if (!osVersion) {
-            alert('Please select your OS version');
-            return;
-        }
-        
-        // Validate that at least one software is selected
-        if (selectedSoftware.length === 0) {
-            alert('Please select at least one software to install');
-            return;
-        }
+        // Save user data for account creation
+        saveUserData();
         
         // Start installation process
         startInstallation(osType, osVersion, selectedSoftware, downloadMode);
@@ -147,6 +233,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function simulateInstallation(osType, osVersion, softwareList) {
         let currentStep = 0;
         const totalSteps = softwareList.length;
+        const accountsToSetup = [];
         
         // Process each software installation
         processNextSoftware();
@@ -163,6 +250,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 logMessage(`Installing ${software}...`);
                 logMessage(`Download URL: ${downloadUrl}`);
+                
+                // Track which accounts need to be created
+                if (software === 'github_desktop') {
+                    accountsToSetup.push('github');
+                } else if (software === 'cursor') {
+                    accountsToSetup.push('cursor');
+                } else if (software === 'docker') {
+                    accountsToSetup.push('docker');
+                }
                 
                 // In a real implementation, we would download and run the installer
                 // Here we're just simulating it with a delay
@@ -181,11 +277,51 @@ document.addEventListener('DOMContentLoaded', function() {
                 logMessage('\nAll software installed successfully! Your development environment is ready.');
                 logMessage('You can now start coding!');
                 
+                // If account setup is enabled, prompt for account creation
+                if (document.getElementById('openBrowser').checked && accountsToSetup.length > 0) {
+                    setTimeout(() => {
+                        logMessage('\nOpening browser tabs for account creation...');
+                        openAccountSetupPages(accountsToSetup);
+                    }, 1500);
+                }
+                
                 // Re-enable start button
                 startSetupBtn.disabled = false;
                 startSetupBtn.textContent = 'Setup Complete';
             }
         }
+    }
+
+    // Function to open browser tabs for account setup
+    function openAccountSetupPages(accountsList) {
+        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+        
+        // Create unique list (no duplicates)
+        const uniqueAccounts = [...new Set(accountsList)];
+        
+        // Open tabs for each account
+        uniqueAccounts.forEach(account => {
+            let url = accountUrls[account];
+            
+            // If we have user data, add query parameters for pre-filling
+            if (userData.email) {
+                const separator = url.includes('?') ? '&' : '?';
+                url += `${separator}email=${encodeURIComponent(userData.email)}`;
+                
+                if (account === 'github' && userData.githubUsername) {
+                    url += `&login=${encodeURIComponent(userData.githubUsername)}`;
+                }
+            }
+            
+            logMessage(`Opening signup page for ${account}...`);
+            
+            // In a real implementation, this would open a browser tab
+            // For our demo, we'll just log it
+            logMessage(`URL: ${url}`);
+            
+            // This would open a browser tab in a real implementation:
+            // window.open(url, '_blank');
+        });
     }
 
     // Function to update progress bar and percentage
@@ -200,9 +336,24 @@ document.addEventListener('DOMContentLoaded', function() {
         installationLogs.scrollTop = installationLogs.scrollHeight;
     }
 
-    // In a production environment, this script would:
-    // 1. Use Electron or similar to create a desktop app
-    // 2. Use node.js to handle actual file downloads
-    // 3. Execute actual installation commands with proper privileges
-    // 4. Handle errors and provide detailed progress information
+    // Load any saved user data
+    function loadUserData() {
+        const savedData = localStorage.getItem('userData');
+        if (savedData) {
+            const userData = JSON.parse(savedData);
+            document.getElementById('firstName').value = userData.firstName || '';
+            document.getElementById('lastName').value = userData.lastName || '';
+            document.getElementById('email').value = userData.email || '';
+            document.getElementById('company').value = userData.company || '';
+            document.getElementById('githubUsername').value = userData.githubUsername || '';
+            document.getElementById('githubAccountType').value = userData.githubAccountType || 'personal';
+            document.getElementById('cursorUsername').value = userData.cursorUsername || '';
+            document.getElementById('cursorPlan').value = userData.cursorPlan || 'free';
+            document.getElementById('dockerUsername').value = userData.dockerUsername || '';
+            document.getElementById('dockerSubscription').value = userData.dockerSubscription || 'personal';
+        }
+    }
+
+    // Initialize saved data
+    loadUserData();
 }); 

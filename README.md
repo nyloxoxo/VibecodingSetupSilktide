@@ -17,6 +17,55 @@ A tool to help beginning developers set up their development environment with a 
 - **Docker** (Optional) - Container platform for application development
 - **Windsurf** (Optional) - Local development environment
 
+## Docker Setup
+
+The project includes Docker configuration for easy deployment and testing of the web interface.
+
+### Docker Containers
+
+| Container Name | Image | Description | Ports |
+|----------------|-------|-------------|-------|
+| vibe-setup-tool | vibecodingsetup-setup-tool | Main setup tool web interface | 7654:80 |
+
+There are also other containers visible in the environment that may be from other projects:
+- journal_webserver (nginx:alpine) - Port 8000:80
+- journal_app (journalbuddy-app) - Port 9000/tcp
+- journal_phpmyadmin (phpmyadmin/phpmyadmin) - Port 8080:80
+- journal_mysql (mysql:8.0) - Port 3307:3306
+
+### Docker Configuration Files
+
+- **docker-compose.yml**: Defines the services and container configuration
+- **Dockerfile**: Simple Nginx-based configuration to serve the web interface
+- **.dockerignore**: Excludes unnecessary files from the Docker build
+
+### Running the Docker Setup
+
+You can use the convenience scripts in the `scripts` directory:
+
+- **./scripts/start.sh**: Start the Docker container
+- **./scripts/stop.sh**: Stop the Docker container
+- **./scripts/rebuild.sh**: Rebuild and restart the container (use after making changes)
+
+Or run the Docker commands manually:
+
+```bash
+# Start the container
+docker-compose up -d
+
+# Stop the container
+docker-compose down
+
+# Rebuild from scratch (after making changes)
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+Once running, access the web interface at:
+```
+http://localhost:7654
+```
+
 ## Implementation Options
 
 This repository includes three different implementation options for the Developer Setup Tool:
