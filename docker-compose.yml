@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  setup-tool:
+    build: .
+    container_name: vibe-setup-tool
+    ports:
+      - "7654:80"
+    restart: unless-stopped 

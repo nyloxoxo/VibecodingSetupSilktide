@@ -1,0 +1,9 @@
+.git
+.gitattributes
+.github
+node_modules
+Dockerfile
+docker-compose.yml
+README.md
+.dockerignore
+installers/ 

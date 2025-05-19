@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LostNFoundDog - Find Your Lost Pet</title>
+    <link rel="stylesheet" href="styles.css?v=1746200504">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .intro-section {
+            max-width: 950px;
+            margin: 0 auto 30px;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .intro-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .intro-header h1 {
+            font-size: 28px;
+            color: #333;
+            margin: 0;
+        }
+        .intro-logo {
+            width: 220px;
+            height: 120px;
+            background-color: #f5f5f5;
+            margin-right: 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 14px;
+        }
+        .intro-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .how-it-works {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 20px;
+        }
+        .step-card {
+            flex: 1 1 270px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+        .step-number {
+            width: 36px;
+            height: 36px;
+            background: #2C2C2C;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .step-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+            color: #333;
+        }
+        .step-card p {
+            margin: 0;
+            color: #555;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .image-placeholder {
+            width: 100%;
+            height: 200px;
+            background-color: #f0f0f0;
+            margin: 15px 0;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-size: 13px;
+        }
+        .image-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 6px;
+            background: #f0f0f0;
+        }
+        .image-placeholder-tall {
+            height: 200px;
+            width: 900px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+            padding: 0;
+            margin-top: 24px;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+        .feature-item {
+            background: white;
+            border-radius: 6px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-left: 3px solid #2C2C2C;
+        }
+        .feature-item h4 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            color: #333;
+        }
+        .feature-item p {
+            margin: 0;
+            font-size: 13px;
+            color: #666;
+        }
+        .get-started-btn {
+            display: block;
+            max-width: 250px;
+            margin: 30px auto 10px;
+            padding: 12px 24px;
+            background-color: #2C2C2C;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+        .get-started-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            background-color: #3a3a3a;
+        }
+        @media (max-width: 768px) {
+            .intro-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .intro-logo {
+                margin: 0 auto 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <ul>
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="register.html">Register Pet</a></li>
+            <li><a href="search.html">Search</a></li>
+            <li><a href="found.html">Found a Dog</a></li>
+            <li><a href="resources.html">Resources</a></li>
+        </ul>
+    </nav>
+    
+    <div class="intro-section">
+        <div class="intro-header">
+            <div class="intro-logo">
+                <img src="images/dog_logo.png" alt="LostNFoundDog Logo" style="max-height: 120px;">
+            </div>
+            <h1>LostNFoundDog: Reuniting Pets With Their Families</h1>
+        </div>
+        
+        <p>Welcome to LostNFoundDog - the national resource helping reunite lost dogs with their families. Our simple but powerful platform connects lost pet reports with found pet sightings across the country, using location data to quickly match pets with their owners.</p>
+        
+        <div class="how-it-works">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h3>Register Your Lost Pet</h3>
+                <p>Enter your dog's details including name, breed, distinctive features, and the location where they were last seen. Upload clear photos to help with identification.</p>
+                <div class="image-placeholder">
+                    <img src="images/register_pet.png" alt="Register your pet" style="max-height: 200px;">
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h3>Set Your Search Radius</h3>
+                <p>Choose how far to search from your pet's last known location. Our system will automatically scan for matches within this area and alert you of potential sightings.</p>
+                <div class="image-placeholder">
+                    <img src="images/search_radius.png" alt="Set search radius" style="max-height: 200px;">
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h3>Get Instant Matches</h3>
+                <p>Receive immediate notifications when a found dog matches your pet's description. Contact information is provided so you can quickly connect with the person who found your dog.</p>
+                <div class="image-placeholder">
+                    <img src="images/match_results.png" alt="Get matches" style="max-height: 200px;">
+                </div>
+            </div>
+        </div>
+        
+        <h3 style="margin-top: 30px; margin-bottom: 15px;">Key Features</h3>
+        <div class="features-grid">
+            <div class="feature-item">
+                <h4>National Database</h4>
+                <p>Access lost and found dog reports from across the entire country in one centralized location.</p>
+            </div>
+            <div class="feature-item">
+                <h4>Smart Matching</h4>
+                <p>Our system uses photo recognition and detailed descriptions to improve match accuracy.</p>
+            </div>
+            <div class="feature-item">
+                <h4>Real-time Alerts</h4>
+                <p>Get instant notifications when a potential match is found in your selected search area.</p>
+            </div>
+            <div class="feature-item">
+                <h4>Community Support</h4>
+                <p>Connect with local volunteers and resources to help expand your search efforts.</p>
+            </div>
+        </div>
+        
+        <a href="register.html" class="get-started-btn">Register Your Pet</a>
+    </div>
+    
+    <script src="script.js?v=1746200504"></script>
+</body>
+</html> 
