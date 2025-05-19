@@ -1,0 +1,1245 @@
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background: linear-gradient(180deg, #FFFFFF 9.66%, #f0f0f0 100%);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    color: #333;
+}
+
+.idea-matrix {
+    box-sizing: border-box;
+    width: 95%;
+    max-width: 950px;
+    margin: 20px auto;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    padding: 25px 20px;
+    min-height: calc(100vh - 70px);
+}
+
+.ideas-expandable-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+    width: calc(100% - 30px);
+    margin: 0 auto 15px;
+    background-color: #f8f8f8;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+}
+
+.idea-card {
+    background: #2C2C2C;
+    color: #F3F3F3;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: all 0.2s ease;
+    margin-bottom: 0;
+    opacity: 0.85;
+    box-sizing: border-box;
+    width: 100%;
+    cursor: pointer;
+    gap: 10px;
+}
+
+.idea-card:hover {
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+    transform: translateY(-2px);
+    opacity: 1;
+    background: #383838;
+}
+
+.idea-card.active {
+    opacity: 1;
+    border-left: 3px solid #4a90e2;
+    background: #383838;
+}
+
+.idea-name {
+    flex-grow: 0;
+    padding: 6px 10px;
+    min-width: 50px;
+    max-width: 270px;
+    width: auto;
+    font-style: normal;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    color: #F3F3F3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 15px;
+    outline: none;
+    cursor: text;
+    position: relative;
+}
+
+.idea-name:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.idea-name:focus {
+    outline: none;
+    background-color: #3d3d3d;
+    color: #F3F3F3;
+    font-style: normal;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4);
+    max-width: 400px;
+    min-width: 200px;
+    overflow: visible;
+    text-overflow: clip;
+}
+
+/* Add edit indicator on hover */
+.idea-name:after {
+    content: "✎";
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    font-size: 10px;
+    transition: opacity 0.2s ease;
+}
+
+.idea-name:hover:after {
+    opacity: 0.7;
+}
+
+.idea-card-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    margin-left: 0;
+    flex-shrink: 0;
+}
+
+.remove-idea-button {
+    background-color: #888;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    min-width: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.remove-idea-button:hover {
+    background-color: #666;
+    transform: translateY(-1px);
+}
+
+.plus-icon, .minus-icon {
+    border: 1px solid #F3F3F3;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+.plus-icon:hover, .minus-icon:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+
+.cards-container {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    margin: 30px auto;
+    overflow: hidden;
+    transform-origin: top;
+    transition: all 0.3s ease;
+    width: 95%;
+    max-width: 800px;
+    box-sizing: border-box;
+    padding: 0;
+}
+
+.cards-container.collapsed {
+    display: none;
+}
+
+.card-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 28px;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 10px 15px;
+    box-sizing: border-box;
+}
+
+.left-cards, .middle-cards, .right-cards {
+    display: flex;
+    flex-direction: column;
+    width: calc(33.333% - 19px);
+    margin-bottom: 0;
+    box-sizing: border-box;
+}
+
+.card {
+    background: #FFFFFF;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    padding: 28px;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.2s ease;
+    margin-bottom: 28px;
+    height: auto;
+    position: relative;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+h2 {
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 120%;
+    letter-spacing: -0.01em;
+    color: #1E1E1E;
+    margin: 0 0 10px 0;
+    text-align: center;
+}
+
+p {
+    font-size: 14px;
+    color: #757575;
+    margin: 0 0 15px 0;
+    text-align: center;
+}
+
+/* Bullet list styling for descriptions */
+.description {
+    position: relative;
+    min-height: 1.5em;
+    line-height: 1.5;
+    text-align: left;
+    font-size: 13px;
+    color: #555;
+    padding-left: 5px;
+}
+
+.description[contenteditable="true"] {
+    padding-left: 5px;
+}
+
+/* Add some spacing between bullet points */
+.description br {
+    display: block;
+    margin-bottom: 3px;
+    content: "";
+}
+
+/* Ensure consistent bullet spacing */
+.description::before {
+    content: "";
+    display: inline-block;
+    width: 0;
+}
+
+.slider {
+    width: 100%;
+    margin: 10px 0;
+}
+
+.slider input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: #e0e0e0;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.slider input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #2C2C2C;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.slider input[type="range"]::-webkit-slider-thumb:hover {
+    background: #444;
+    transform: scale(1.1);
+}
+
+.slider input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border: none;
+    border-radius: 50%;
+    background: #2C2C2C;
+    cursor: pointer;
+}
+
+.slider-value {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #2C2C2C;
+}
+
+.slider-value input {
+    width: 50px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #f8f8f8;
+    font-size: 14px;
+    color: #2C2C2C;
+    padding: 4px;
+    margin: 0 5px;
+}
+
+.slider-value input:focus {
+    outline: none;
+    border-color: #2C2C2C;
+    box-shadow: 0 0 0 2px rgba(44, 44, 44, 0.25);
+    background-color: #f0f0f0;
+}
+
+.edit-button {
+    background: #2C2C2C;
+    color: #F5F5F5;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: center;
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 0;
+    transition: all 0.2s ease;
+}
+
+.edit-button:hover {
+    background: #444;
+    transform: translateY(-1px);
+}
+
+.top-nav {
+    background-color: #2C2C2C;
+    padding: 12px 0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.top-nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.top-nav li {
+    margin: 0 15px;
+}
+
+.top-nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 15px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.top-nav a:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    margin: 25px 0;
+    gap: 15px;
+}
+
+.save-button, .process-all-button, .add-new-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    min-width: 120px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    color: white;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.save-button {
+    background-color: #444;
+}
+
+.save-button:hover {
+    background-color: #666;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.process-all-button {
+    background-color: #444;
+}
+
+.process-all-button:hover {
+    background-color: #666;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.add-new-button {
+    background-color: #444;
+}
+
+.add-new-button:hover {
+    background-color: #666;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Results page styles */
+.results-container {
+    max-width: 1000px;
+    margin: 1.5rem auto;
+    padding: 1.5rem;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.results-container h1 {
+    text-align: center;
+    margin-bottom: 1.2rem;
+    color: #2C2C2C;
+    font-size: 22px;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.results-table th, .results-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.results-table th {
+    background-color: #444;
+    color: white;
+    font-weight: 600;
+}
+
+.results-table tr:last-child td {
+    border-bottom: none;
+}
+
+.results-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+.detail-row {
+    background-color: #f5f5f5;
+    transition: all 0.3s ease;
+}
+
+.criteria-details {
+    padding: 1.5rem;
+}
+
+.criteria-details h3 {
+    margin-top: 0;
+    color: #2C2C2C;
+}
+
+.criteria-details ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 1rem 0;
+}
+
+.criteria-details li {
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed #ddd;
+    display: flex;
+    justify-content: space-between;
+}
+
+.criteria-details li:last-child {
+    border-bottom: none;
+}
+
+.detail-btn {
+    background-color: #444;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.detail-btn:hover {
+    background-color: #666;
+    transform: translateY(-1px);
+}
+
+.clear-data-btn {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 2rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.clear-data-btn:hover {
+    background-color: #e53935;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Validation styles */
+.idea-name[contenteditable="true"]:empty:before {
+    content: attr(data-placeholder);
+    color: rgba(255,255,255,0.5);
+}
+
+.idea-name {
+    min-width: 200px;
+    display: inline-block;
+}
+
+/* Mobile responsiveness improvements */
+@media (max-width: 1200px) {
+    .card-grid {
+        justify-content: flex-start;
+        gap: 24px;
+        max-width: 900px;
+    }
+    
+    .left-cards, .middle-cards, .right-cards {
+        width: calc(33.333% - 16px);
+    }
+}
+
+@media (max-width: 900px) {
+    .idea-matrix {
+        width: 95%;
+        padding: 20px 15px;
+    }
+    
+    .cards-container {
+        flex-direction: column;
+        gap: 15px;
+        width: 95%;
+        margin: 20px auto;
+        padding: 10px 0;
+    }
+    
+    .form-content {
+        padding: 25px 20px 15px;
+        overflow: hidden;
+    }
+    
+    .card-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 20px;
+        padding: 8px 12px;
+        max-width: 100%;
+    }
+    
+    .left-cards, .middle-cards, .right-cards {
+        width: calc(50% - 10px);
+        max-width: 100%;
+    }
+    
+    .card {
+        padding: 22px;
+        margin-bottom: 20px;
+    }
+    
+    .form-header {
+        padding: 10px;
+    }
+    
+    .collapse-form-button-container {
+        min-width: 60px;
+    }
+}
+
+@media (max-width: 600px) {
+    .results-table th, .results-table td {
+        padding: 0.6rem 0.4rem;
+        font-size: 0.9rem;
+    }
+    
+    .left-cards, .middle-cards, .right-cards {
+        width: 100%;
+    }
+    
+    .action-buttons {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    
+    .save-button, .process-all-button, .add-new-button {
+        width: 100%;
+        max-width: 280px;
+        margin-bottom: 0;
+        font-size: 15px;
+        padding: 8px 12px;
+    }
+    
+    h2 {
+        font-size: 18px;
+    }
+    
+    .card {
+        padding: 20px;
+        margin-bottom: 16px;
+    }
+    
+    .form-content {
+        padding: 20px 15px 10px;
+        overflow: hidden;
+    }
+    
+    .form-idea-name {
+        font-size: 16px;
+    }
+    
+    .card-grid {
+        flex-direction: column;
+        gap: 16px;
+        padding: 5px 8px;
+    }
+    
+    .results-table th::after {
+        right: 5px;
+        font-size: 12px;
+    }
+}
+
+/* Add responsive styles for the idea-name */
+@media (max-width: 600px) {
+    .idea-name {
+        max-width: 200px;
+    }
+    
+    .idea-name:focus {
+        max-width: 250px;
+    }
+    
+    /* Existing mobile styles... */
+}
+
+/* Form collapse/expand */
+.cards-container.collapsed {
+    display: none;
+}
+
+.form-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background-color: #f0f0f0;
+    border-bottom: 1px solid #ddd;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    width: auto;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: visible;
+    border-radius: 8px 8px 0 0;
+}
+
+.header-spacer {
+    flex: 1;
+}
+
+.form-idea-name {
+    margin: 0;
+    text-align: center;
+    flex: 2;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.collapse-form-button-container {
+    flex: 1;
+    text-align: right;
+    min-width: 90px;
+    padding-left: 10px;
+}
+
+.collapse-form-button {
+    padding: 8px 12px;
+    background-color: #555;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+}
+
+.collapse-form-button:hover {
+    background-color: #444;
+}
+
+.form-content {
+    padding: 32px 30px 20px;
+    background-color: #383335;
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.slider input[type="range"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(44, 44, 44, 0.25);
+}
+
+/* Remove any potential wrappers or hidden line breaks */
+.card-grid > br, 
+.card-grid > div:empty,
+.card-grid > span:empty {
+    display: none;
+    margin: 0;
+    padding: 0;
+    height: 0;
+    line-height: 0;
+}
+
+/* Ensure consistent vertical spacing */
+.form-content > *, 
+.card-grid > * {
+    margin-top: 0;
+}
+
+/* Add specific fix for first row spacing */
+.card:first-child,
+.left-cards:first-child,
+.middle-cards:first-child,
+.right-cards:first-child {
+    margin-top: 0;
+}
+
+/* Fix for card visibility */
+.form-content .left-cards,
+.form-content .middle-cards,
+.form-content .right-cards {
+    display: flex;
+}
+
+/* New Filter Panel Styles */
+.filter-panel {
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.filter-header h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.add-filter-btn {
+    background-color: #2C2C2C;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.add-filter-btn:hover {
+    background-color: #444;
+    transform: translateY(-1px);
+}
+
+.active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.filter-tag {
+    display: flex;
+    align-items: center;
+    background-color: #e0e0e0;
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+.filter-tag-text {
+    margin-right: 8px;
+}
+
+.remove-filter {
+    background-color: #bbb;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.remove-filter:hover {
+    background-color: #999;
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    overflow: auto;
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    width: 80%;
+    max-width: 500px;
+    position: relative;
+}
+
+.close-modal {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #888;
+    cursor: pointer;
+}
+
+.close-modal:hover {
+    color: #555;
+}
+
+.filter-criteria-container, .filter-range-container {
+    margin-bottom: 15px;
+}
+
+.filter-criteria-container label, .filter-range-container label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.filter-criteria-container select, .filter-range-container input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.apply-filter-btn {
+    background-color: #2C2C2C;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s ease;
+}
+
+.apply-filter-btn:hover {
+    background-color: #444;
+    transform: translateY(-1px);
+}
+
+/* Sortable Table Styles */
+.results-table th {
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+    padding-right: 25px; /* Space for the sort icons */
+}
+
+.results-table th.draggable {
+    cursor: grab;
+}
+
+.results-table th.dragging {
+    opacity: 0.7;
+    cursor: grabbing;
+    background-color: #555 !important;
+}
+
+.results-table th.drag-over {
+    border-left: 2px solid #fff;
+}
+
+.results-table .remove-column {
+    font-size: 14px;
+    width: 16px;
+    height: 16px;
+    line-height: 14px;
+    text-align: center;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2);
+    position: absolute;
+    right: 26px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    display: none;
+}
+
+.results-table th:hover .remove-column {
+    display: inline-block;
+}
+
+.results-table .remove-column:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+.results-table th.no-sort {
+    cursor: default;
+    padding-right: 10px;
+}
+
+.results-table th.no-sort::after {
+    display: none;
+}
+
+.results-table th::after {
+    content: "↕";
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    font-size: 14px;
+    opacity: 0.6;
+}
+
+.results-table th.sort-asc::after {
+    content: "↑";
+    color: #FFF;
+    opacity: 1;
+    font-weight: bold;
+    text-shadow: 0px 0px 1px rgba(0,0,0,0.5);
+}
+
+.results-table th.sort-desc::after {
+    content: "↓";
+    color: #FFF;
+    opacity: 1;
+    font-weight: bold;
+    text-shadow: 0px 0px 1px rgba(0,0,0,0.5);
+}
+
+/* Slider Tooltips */
+.slider {
+    position: relative;
+}
+
+.slider input[type="range"] {
+    position: relative;
+}
+
+.slider input[type="range"]::before {
+    content: attr(title);
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.slider input[type="range"]:hover::before {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .filter-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .modal-content {
+        width: 90%;
+        margin: 20% auto;
+    }
+    
+    .results-table th::after {
+        right: 5px;
+        font-size: 12px;
+    }
+}
+
+/* Add styling for sortable columns */
+.results-table th[data-sort] {
+    cursor: pointer;
+    position: relative;
+    padding-right: 25px; /* Add space for the sort icon */
+}
+
+.results-table th[data-sort]::after {
+    content: "⇕";
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.5;
+}
+
+.results-table th.sort-asc::after {
+    content: "↑";
+    opacity: 1;
+}
+
+.results-table th.sort-desc::after {
+    content: "↓";
+    opacity: 1;
+}
+
+/* Card editing and deletion styles */
+.card {
+    position: relative;
+}
+
+.delete-card-btn {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background: rgba(255, 70, 70, 0.15);
+    color: #e53935;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    margin: 0;
+    line-height: 1;
+    opacity: 0;
+    z-index: 100;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover .delete-card-btn {
+    opacity: 1;
+}
+
+.delete-card-btn:hover {
+    background: rgba(255, 0, 0, 0.25);
+    color: #d32f2f;
+    transform: scale(1.1);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+h2[contenteditable="true"],
+.description[contenteditable="true"] {
+    background-color: #f8f8f8;
+    padding: 5px;
+    border-radius: 4px;
+    outline: none;
+    border: 1px solid #ddd;
+    min-height: 1em;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.3);
+}
+
+.description {
+    position: relative;
+}
+
+.editable-field {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.editable-field:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Improve slider tooltips */
+.slider input[type="range"]::before,
+.slider input[type="number"]::before {
+    z-index: 100;
+}
+
+/* Remove the edit button entirely */
+.edit-card-btn {
+    display: none;
+}
+
+/* Card Edit Mode - not needed anymore */
+.card.edit-mode h2,
+.card.edit-mode .description {
+    cursor: text;
+}
+
+/* Fix for card control buttons container */
+.card-control-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    gap: 5px;
+    z-index: 10;
+}
+
+/* Add column button in table header */
+.add-column-header {
+    width: 30px;
+    min-width: 30px;
+    padding: 0 !important;
+    text-align: center;
+}
+
+.add-column-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+    height: 100%;
+    width: 100%;
+    transition: all 0.2s ease;
+}
+
+.add-column-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.slider {
+    display: flex;
+    align-items: center;
+}
+
+/* Active nav link styling */
+.top-nav a.active {
+    color: white;
+    font-weight: 600;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-bottom: 2px solid white;
+}
