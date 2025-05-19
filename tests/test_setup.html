@@ -619,10 +619,151 @@
         </div>
     </div>
 
-    <!-- Load the original setup.js to make its functions available -->
-    <script src="../setup.js"></script>
+    <!-- First, expose downloadUrls, installCommands and accountUrls from setup.js -->
+    <script>
+        // Global variables that will be used by both scripts
+        window.downloadUrls = {
+            mac: {
+                github_desktop: {
+                    mac_intel: 'https://central.github.com/deployments/desktop/desktop/latest/darwin',
+                    mac_silicon: 'https://central.github.com/deployments/desktop/desktop/latest/darwin-arm64'
+                },
+                cursor: {
+                    mac_intel: 'https://download.cursor.sh/mac/intel',
+                    mac_silicon: 'https://download.cursor.sh/mac/apple-silicon'
+                },
+                docker: {
+                    mac_intel: 'https://desktop.docker.com/mac/main/amd64/Docker.dmg',
+                    mac_silicon: 'https://desktop.docker.com/mac/main/arm64/Docker.dmg'
+                },
+                windsurf: {
+                    mac_intel: 'https://github.com/windsurfapp/windsurf/releases/latest/download/Windsurf-Mac.dmg',
+                    mac_silicon: 'https://github.com/windsurfapp/windsurf/releases/latest/download/Windsurf-Mac-arm64.dmg'
+                }
+            },
+            windows: {
+                github_desktop: {
+                    win_10: 'https://central.github.com/deployments/desktop/desktop/latest/win32',
+                    win_11: 'https://central.github.com/deployments/desktop/desktop/latest/win32'
+                },
+                cursor: {
+                    win_10: 'https://download.cursor.sh/windows/setup',
+                    win_11: 'https://download.cursor.sh/windows/setup'
+                },
+                docker: {
+                    win_10: 'https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe',
+                    win_11: 'https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe'
+                },
+                windsurf: {
+                    win_10: 'https://github.com/windsurfapp/windsurf/releases/latest/download/Windsurf-Windows.exe',
+                    win_11: 'https://github.com/windsurfapp/windsurf/releases/latest/download/Windsurf-Windows.exe'
+                }
+            }
+        };
+
+        // Installation commands by OS
+        window.installCommands = {
+            mac: {
+                github_desktop: 'sudo hdiutil attach GitHub\\ Desktop.dmg && cp -r /Volumes/GitHub\\ Desktop/GitHub\\ Desktop.app /Applications/ && sudo hdiutil detach /Volumes/GitHub\\ Desktop',
+                cursor: 'sudo hdiutil attach Cursor.dmg && cp -r /Volumes/Cursor/Cursor.app /Applications/ && sudo hdiutil detach /Volumes/Cursor',
+                docker: 'sudo hdiutil attach Docker.dmg && sudo /Volumes/Docker/Docker.app/Contents/MacOS/install && sudo hdiutil detach /Volumes/Docker',
+                windsurf: 'sudo hdiutil attach Windsurf.dmg && cp -r /Volumes/Windsurf/Windsurf.app /Applications/ && sudo hdiutil detach /Volumes/Windsurf'
+            },
+            windows: {
+                github_desktop: 'start /wait GitHubDesktopSetup.exe',
+                cursor: 'start /wait CursorSetup.exe',
+                docker: 'start /wait DockerDesktopInstaller.exe',
+                windsurf: 'start /wait WindsurfSetup.exe'
+            }
+        };
+
+        // Account creation URLs
+        window.accountUrls = {
+            github: 'https://github.com/signup',
+            cursor: 'https://cursor.sh/login',
+            docker: 'https://hub.docker.com/signup'
+        };
+    </script>
     
-    <!-- Load our test installer script that will override the necessary functions -->
+    <!-- Load our test installer script -->
     <script src="test_installer.js"></script>
+
+    <script>
+        // Handle missing images
+        function handleMissingImages() {
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                img.onerror = function() {
+                    console.log('Image failed to load:', this.src);
+                    // If image fails to load, show a placeholder
+                    this.src = 'data:image/svg+xml;charset=utf-8,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 200 200%22%3E%3Crect width%3D%22200%22 height%3D%22200%22 fill%3D%22%23eee%22%2F%3E%3Ctext x%3D%2250%25%22 y%3D%2250%25%22 dominant-baseline%3D%22middle%22 text-anchor%3D%22middle%22 font-family%3D%22Arial%2C sans-serif%22 font-size%3D%2220%22 fill%3D%22%23999%22%3EImage%3C%2Ftext%3E%3C%2Fsvg%3E';
+                };
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            handleMissingImages();
+            
+            // Ensure the modal close button works
+            document.getElementById('modalCloseBtn').addEventListener('click', function() {
+                document.getElementById('validationModal').classList.remove('visible');
+            });
+            
+            // OS type selection handling
+            const osTypeRadios = document.getElementsByName('os_type');
+            const macOptions = document.querySelector('.mac-options');
+            const windowsOptions = document.querySelector('.windows-options');
+            
+            osTypeRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const osType = this.value;
+                    
+                    if (osType === 'mac') {
+                        macOptions.style.display = 'block';
+                        windowsOptions.style.display = 'none';
+                        document.getElementById('os_version').value = 'mac_silicon';
+                    } else {
+                        macOptions.style.display = 'none';
+                        windowsOptions.style.display = 'block';
+                        document.getElementById('os_version').value = 'win_11';
+                    }
+                });
+            });
+            
+            // Manually set default value
+            document.getElementById('os_version').value = 'mac_silicon';
+            
+            // Recommend software selection handling
+            const installModeRadios = document.getElementsByName('install_mode');
+            const recommendedSoftware = document.querySelectorAll('.recommended-software');
+            const optionalSoftware = document.querySelectorAll('.optional-software');
+            
+            installModeRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'recommended') {
+                        recommendedSoftware.forEach(checkbox => {
+                            checkbox.checked = true;
+                            checkbox.disabled = true;
+                        });
+                        optionalSoftware.forEach(checkbox => {
+                            checkbox.checked = false;
+                            checkbox.disabled = false;
+                        });
+                    } else {
+                        recommendedSoftware.forEach(checkbox => {
+                            checkbox.disabled = false;
+                        });
+                        optionalSoftware.forEach(checkbox => {
+                            checkbox.disabled = false;
+                        });
+                    }
+                });
+            });
+            
+            // Trigger the change event for default options
+            document.querySelector('input[name="os_type"]:checked').dispatchEvent(new Event('change'));
+            document.querySelector('input[name="install_mode"]:checked').dispatchEvent(new Event('change'));
+        });
+    </script>
 </body>
 </html> 

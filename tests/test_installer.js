@@ -7,6 +7,52 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Test script loaded');
     
+    // Debug - check if setup.js functions are available
+    if (typeof window.startInstallation === 'undefined') {
+        console.error('ERROR: startInstallation function from setup.js is not available!');
+        document.getElementById('installationLogs').textContent += 'ERROR: Functions from setup.js are not available. Check console for details.\n';
+        
+        // Add a global error handler to the start button
+        document.getElementById('startSetupBtn').addEventListener('click', function() {
+            console.log('Start button clicked - direct handler');
+            document.getElementById('installationLogs').textContent += 'Button clicked, but setup.js functions not found.\n';
+            
+            // Show installation progress section anyway
+            document.getElementById('installationProgress').style.display = 'block';
+            
+            // Display debugging information
+            const debugInfo = {
+                'download_urls_available': typeof window.downloadUrls !== 'undefined',
+                'install_commands_available': typeof window.installCommands !== 'undefined',
+                'account_urls_available': typeof window.accountUrls !== 'undefined'
+            };
+            
+            document.getElementById('installationLogs').textContent += 'Debug info: ' + JSON.stringify(debugInfo, null, 2) + '\n';
+            
+            // Try to extract setup functions from the document
+            if (typeof window.setupForm === 'undefined') {
+                document.getElementById('installationLogs').textContent += 'Attempting to extract functions from setup.js...\n';
+                
+                // Manually handle the form submission as a fallback
+                const formData = new FormData(document.getElementById('setupForm'));
+                const osType = formData.get('os_type') || 'mac';
+                const osVersion = formData.get('os_version') || 'mac_silicon';
+                const downloadMode = formData.get('download_mode') || 'web';
+                
+                // Get all checked software
+                const selectedSoftware = [];
+                const softwareCheckboxes = document.querySelectorAll('input[name="software"]:checked');
+                softwareCheckboxes.forEach(checkbox => {
+                    selectedSoftware.push(checkbox.value);
+                });
+                
+                document.getElementById('installationLogs').textContent += `Would install: ${osType} (${osVersion})\nSoftware: ${selectedSoftware.join(', ')}\n`;
+            }
+        });
+    } else {
+        console.log('setup.js functions found and available');
+    }
+    
     // Create a test control panel
     createTestControls();
     
@@ -60,12 +106,109 @@ function updateTestStatus(message) {
     console.log('Test status:', message);
 }
 
+// Function to safely test real downloads without installing
+function realDownloadTest(osType, osVersion, softwareList, downloadMode) {
+    let currentStep = 0;
+    const totalSteps = softwareList.length;
+    const accountsToSetup = [];
+    
+    // Process each software download test
+    processNextSoftware();
+    
+    function processNextSoftware() {
+        if (currentStep < totalSteps) {
+            const software = softwareList[currentStep];
+            const progress = Math.round((currentStep / totalSteps) * 100);
+            
+            updateProgress(progress);
+            
+            // Get download URL based on OS type and version
+            const downloadUrl = window.downloadUrls[osType][software][osVersion];
+            
+            logMessage(`[TEST] Downloading ${software}...`);
+            logMessage(`Download URL: ${downloadUrl}`);
+            
+            // Track which accounts need to be created
+            if (software === 'github_desktop') {
+                accountsToSetup.push('github');
+            } else if (software === 'cursor') {
+                accountsToSetup.push('cursor');
+            } else if (software === 'docker') {
+                accountsToSetup.push('docker');
+            }
+            
+            // Show abort button
+            window.testControls.abortButton.style.display = 'block';
+            
+            // Initialize a real download but abort it before completion
+            // This tests that downloads actually start but prevents completing them
+            testDownload(downloadUrl, software)
+                .then(result => {
+                    if (result.status === 'aborted') {
+                        logMessage(`[TEST] Download of ${software} was aborted`);
+                        window.testControls.abortButton.style.display = 'none';
+                        
+                        // Ask user if they want to continue to next software
+                        if (confirm(`Download of ${software} was aborted. Continue to next software?`)) {
+                            currentStep++;
+                            processNextSoftware();
+                        } else {
+                            logMessage(`[TEST] Test terminated by user`);
+                            document.getElementById('startSetupBtn').disabled = false;
+                            document.getElementById('startSetupBtn').textContent = 'Restart Test';
+                        }
+                    } else {
+                        logMessage(`[TEST] Download of ${software} completed successfully`);
+                        logMessage(`[TEST] Installation command that would run: ${window.installCommands[osType][software]}`);
+                        logMessage(`[TEST] ${software} "installed" successfully (simulation)\n`);
+                        
+                        // Move to next software
+                        currentStep++;
+                        processNextSoftware();
+                    }
+                })
+                .catch(error => {
+                    logMessage(`[TEST] Error during download test: ${error.message}`);
+                    window.testControls.abortButton.style.display = 'none';
+                    
+                    // Ask user if they want to continue despite the error
+                    if (confirm(`Error downloading ${software}. Continue to next software?`)) {
+                        currentStep++;
+                        processNextSoftware();
+                    } else {
+                        logMessage(`[TEST] Test terminated by user`);
+                        document.getElementById('startSetupBtn').disabled = false;
+                        document.getElementById('startSetupBtn').textContent = 'Restart Test';
+                    }
+                });
+            
+        } else {
+            // All software downloaded
+            updateProgress(100);
+            logMessage('\n[TEST] All downloads completed successfully! (Test Mode)');
+            logMessage('[TEST] In a real installation, software would now be installed.');
+            
+            // If account setup is enabled, show what browser tabs would open
+            if (document.getElementById('openBrowser') && document.getElementById('openBrowser').checked && accountsToSetup.length > 0) {
+                setTimeout(() => {
+                    logMessage('\n[TEST] Browser tabs would open for these accounts:');
+                    accountsToSetup.forEach(account => {
+                        logMessage(`- ${account}: ${window.accountUrls[account]}`);
+                    });
+                }, 1500);
+            } else {
+                logMessage('\n[TEST] No browser tabs would be opened (option disabled or no accounts needed)');
+            }
+            
+            // Re-enable start button
+            document.getElementById('startSetupBtn').disabled = false;
+            document.getElementById('startSetupBtn').textContent = 'Test Completed';
+        }
+    }
+}
+
 // Override installation functions from the main setup.js
 function overrideInstallationFunctions() {
-    // Store original functions to call after our test interception
-    const originalStartInstallation = window.startInstallation;
-    const originalSimulateInstallation = window.simulateInstallation;
-    
     // Create test versions with safe download handling
     window.startInstallation = function(osType, osVersion, softwareList, downloadMode) {
         updateTestStatus('Installation started - Test Mode');
@@ -84,104 +227,39 @@ function overrideInstallationFunctions() {
         realDownloadTest(osType, osVersion, softwareList, downloadMode);
     };
     
-    // Function to safely test real downloads without installing
-    function realDownloadTest(osType, osVersion, softwareList, downloadMode) {
-        let currentStep = 0;
-        const totalSteps = softwareList.length;
-        const accountsToSetup = [];
+    // Add a direct click handler to the start button
+    document.getElementById('startSetupBtn').addEventListener('click', function() {
+        console.log('Start button clicked');
         
-        // Process each software download test
-        processNextSoftware();
+        // Get form data
+        const formData = new FormData(document.getElementById('setupForm'));
+        const osType = formData.get('os_type') || 'mac';
+        const osVersion = formData.get('os_version') || 'mac_silicon';
+        const installMode = formData.get('install_mode') || 'recommended';
+        const downloadMode = formData.get('download_mode') || 'web';
         
-        function processNextSoftware() {
-            if (currentStep < totalSteps) {
-                const software = softwareList[currentStep];
-                const progress = Math.round((currentStep / totalSteps) * 100);
-                
-                updateProgress(progress);
-                
-                // Get download URL based on OS type and version
-                const downloadUrl = window.downloadUrls[osType][software][osVersion];
-                
-                logMessage(`[TEST] Downloading ${software}...`);
-                logMessage(`Download URL: ${downloadUrl}`);
-                
-                // Track which accounts need to be created
-                if (software === 'github_desktop') {
-                    accountsToSetup.push('github');
-                } else if (software === 'cursor') {
-                    accountsToSetup.push('cursor');
-                } else if (software === 'docker') {
-                    accountsToSetup.push('docker');
-                }
-                
-                // Show abort button
-                window.testControls.abortButton.style.display = 'block';
-                
-                // Initialize a real download but abort it before completion
-                // This tests that downloads actually start but prevents completing them
-                testDownload(downloadUrl, software)
-                    .then(result => {
-                        if (result.status === 'aborted') {
-                            logMessage(`[TEST] Download of ${software} was aborted`);
-                            window.testControls.abortButton.style.display = 'none';
-                            
-                            // Ask user if they want to continue to next software
-                            if (confirm(`Download of ${software} was aborted. Continue to next software?`)) {
-                                currentStep++;
-                                processNextSoftware();
-                            } else {
-                                logMessage(`[TEST] Test terminated by user`);
-                                document.getElementById('startSetupBtn').disabled = false;
-                                document.getElementById('startSetupBtn').textContent = 'Restart Test';
-                            }
-                        } else {
-                            logMessage(`[TEST] Download of ${software} completed successfully`);
-                            logMessage(`[TEST] Installation command that would run: ${window.installCommands[osType][software]}`);
-                            logMessage(`[TEST] ${software} "installed" successfully (simulation)\n`);
-                            
-                            // Move to next software
-                            currentStep++;
-                            processNextSoftware();
-                        }
-                    })
-                    .catch(error => {
-                        logMessage(`[TEST] Error during download test: ${error.message}`);
-                        window.testControls.abortButton.style.display = 'none';
-                        
-                        // Ask user if they want to continue despite the error
-                        if (confirm(`Error downloading ${software}. Continue to next software?`)) {
-                            currentStep++;
-                            processNextSoftware();
-                        } else {
-                            logMessage(`[TEST] Test terminated by user`);
-                            document.getElementById('startSetupBtn').disabled = false;
-                            document.getElementById('startSetupBtn').textContent = 'Restart Test';
-                        }
-                    });
-                
-            } else {
-                // All software downloaded
-                updateProgress(100);
-                logMessage('\n[TEST] All downloads completed successfully! (Test Mode)');
-                logMessage('[TEST] In a real installation, software would now be installed.');
-                
-                // If account setup is enabled, show what browser tabs would open
-                if (document.getElementById('openBrowser').checked && accountsToSetup.length > 0) {
-                    setTimeout(() => {
-                        logMessage('\n[TEST] Browser tabs would open for these accounts:');
-                        accountsToSetup.forEach(account => {
-                            logMessage(`- ${account}: ${window.accountUrls[account]}`);
-                        });
-                    }, 1500);
-                }
-                
-                // Re-enable start button
-                document.getElementById('startSetupBtn').disabled = false;
-                document.getElementById('startSetupBtn').textContent = 'Test Completed';
-            }
+        // Validate - make sure OS version is selected
+        if (!osVersion) {
+            alert('Please select your OS version');
+            return;
         }
-    }
+        
+        // Get all checked software
+        const selectedSoftware = [];
+        const softwareCheckboxes = document.querySelectorAll('input[name="software"]:checked');
+        softwareCheckboxes.forEach(checkbox => {
+            selectedSoftware.push(checkbox.value);
+        });
+        
+        // Validate - make sure at least one software is selected
+        if (selectedSoftware.length === 0) {
+            alert('Please select at least one software to install');
+            return;
+        }
+        
+        // Start the test installation process
+        window.startInstallation(osType, osVersion, selectedSoftware, downloadMode);
+    });
     
     // Function to test a real download but abort it before completion
     function testDownload(url, software) {
