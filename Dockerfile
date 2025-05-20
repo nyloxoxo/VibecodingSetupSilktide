@@ -2,8 +2,19 @@ FROM node:16-alpine
 
 WORKDIR /app
 
-# Install dependencies
-RUN apk add --no-cache curl bash sudo
+# Install dependencies including X11 and other required packages for Electron
+RUN apk add --no-cache curl bash sudo \
+    # Additional dependencies for Electron
+    xvfb \
+    libx11-dev \
+    libxcb-dev \
+    libxtst-dev \
+    libxrandr-dev \
+    libxi-dev \
+    libxcomposite-dev \
+    libxcursor-dev \
+    libasound2 \
+    libgbm-dev
 
 # Copy package files
 COPY package.json package-lock.json* ./
@@ -25,7 +36,8 @@ RUN mkdir -p temp && chmod 777 temp
 # Create installers directories
 RUN mkdir -p installers/mac installers/windows && chmod -R 777 installers
 
-EXPOSE 80
+# Expose ports - 80 for web server, 3000 for Electron dev server
+EXPOSE 80 3000
 
 # Command to run the server
 CMD ["node", "server.js"] 

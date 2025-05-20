@@ -6,8 +6,16 @@ services:
     container_name: vibe-setup-tool
     ports:
       - "7654:80"
+      - "3000:3000"
     restart: unless-stopped 
     privileged: true
     environment:
       - NODE_ENV=production
-      - PORT=80 
+      - PORT=80
+      - DISPLAY=:0
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ./:/app
+    # For running Electron, we provide an alternative command
+    # To run Electron instead of the web server, use:
+    # docker-compose run --rm setup-tool ./run-electron.sh 
