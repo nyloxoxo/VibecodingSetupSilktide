@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (userAgent.indexOf('linux') !== -1) return 'linux';
         return 'unknown';
     }
-    
+
     // Function to perform the real installation process
     function performRealInstallation(osType, osVersion, softwareList, downloadMode, platform) {
         let currentStep = 0;
@@ -284,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(data => {
                     if (data.success) {
                         logMessage(`Installation command executed: ${data.command}`);
-                        logMessage(`${software} installed successfully!\n`);
+                    logMessage(`${software} installed successfully!\n`);
                     } else {
                         logMessage(`Error installing ${software}: ${data.error}\n`);
                     }

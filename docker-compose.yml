@@ -6,7 +6,7 @@ services:
     container_name: vibe-setup-tool
     ports:
       - "7654:80"
-    restart: unless-stopped
+    restart: unless-stopped 
     privileged: true
     environment:
       - NODE_ENV=production

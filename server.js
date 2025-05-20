@@ -5,11 +5,45 @@ const path = require('path');
 const https = require('https');
 const http = require('http');
 const app = express();
-const PORT = process.env.PORT || 7654;
+const PORT = process.env.PORT || 80; // Use port 80 inside container, mapped to 7654 externally
+
+// Add error handling
+process.on('uncaughtException', (error) => {
+    console.error('Uncaught Exception:', error);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+// Add graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM signal received: closing HTTP server');
+    server.close(() => {
+        console.log('HTTP server closed');
+    });
+});
 
 // Middleware
 app.use(express.json());
+
+// Serve static files from current directory
 app.use(express.static('.'));
+
+// Set up routes - serve index.html or setup.html as the default route
+app.get('/', (req, res) => {
+    console.log('Serving index.html or setup.html');
+    const indexPath = path.join(__dirname, 'index.html');
+    const setupPath = path.join(__dirname, 'setup.html');
+    
+    if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+    } else if (fs.existsSync(setupPath)) {
+        res.sendFile(setupPath);
+    } else {
+        res.status(404).send('Neither index.html nor setup.html found');
+    }
+});
 
 // Create temp directory for downloads if it doesn't exist
 const tempDir = path.join(__dirname, 'temp');
@@ -17,8 +51,21 @@ if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir);
 }
 
+// Handle 404 errors
+app.use((req, res, next) => {
+    console.log(`404 Not Found: ${req.url}`);
+    res.status(404).send('404 Not Found');
+});
+
+// Handle general errors
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+});
+
 // Installation API endpoint
 app.post('/api/install', async (req, res) => {
+    console.log('Received installation request:', req.body);
     const { software, osType, osVersion, downloadUrl, downloadMode, platform } = req.body;
     
     // Validate request
@@ -132,7 +179,7 @@ function getInstallerExtension(osType) {
 }
 
 // Start the server
-app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Developer Setup Server is running on port ${PORT}`);
     console.log(`Access the web interface at: http://localhost:${PORT}`);
 }); 
