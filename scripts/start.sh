@@ -3,5 +3,6 @@
 echo "Starting Developer Setup Tool..."
 docker-compose up -d
 
-echo -e "\nSetup tool is now running!"
-echo "Access the web interface at: http://localhost:7654" 
+echo -e "\nDeveloper Setup Tool is now running!"
+echo "Access the Developer Setup Tool at: http://localhost:7654"
+echo "If you encounter any issues, please check that Docker is running correctly." 
