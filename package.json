@@ -2,15 +2,41 @@
   "name": "developer-setup-tool",
   "version": "1.0.0",
   "description": "Developer environment setup tool that installs necessary software",
-  "main": "server.js",
+  "main": "main.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "electron-start": "electron .",
+    "electron-dev": "electron .",
+    "electron-pack": "electron-builder --dir",
+    "electron-dist": "electron-builder",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "build": {
+    "appId": "com.vibecoding.setup",
+    "productName": "Developer Setup Tool",
+    "directories": {
+      "output": "dist"
+    },
+    "mac": {
+      "category": "public.app-category.developer-tools"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   },
   "dependencies": {
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "electron-dl": "^3.5.0",
+    "sudo-prompt": "^9.2.1",
+    "fs-extra": "^11.1.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22"
+    "nodemon": "^2.0.22",
+    "electron": "^26.0.0",
+    "electron-builder": "^24.4.0"
   }
 }
