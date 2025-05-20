@@ -217,20 +217,25 @@ document.addEventListener('DOMContentLoaded', function() {
         logMessage(`Installation mode: ${downloadMode === 'web' ? 'Download from web' : 'Use bundled installers'}`);
         logMessage(`Software to install: ${softwareList.join(', ')}\n`);
         
-        // If using web download mode
-        if (downloadMode === 'web') {
-            // In a real implementation, we would actually download and install
-            // For this demo, we'll simulate the process
-            simulateInstallation(osType, osVersion, softwareList);
-        } else {
-            // Using bundled installers
-            logMessage('Using bundled installers...');
-            simulateInstallation(osType, osVersion, softwareList);
-        }
+        // Determine the platform to use
+        const platform = detectPlatform();
+        logMessage(`Detected platform: ${platform}`);
+        
+        // Now perform actual installation instead of simulation
+        performRealInstallation(osType, osVersion, softwareList, downloadMode, platform);
     }
-
-    // Function to simulate the installation process
-    function simulateInstallation(osType, osVersion, softwareList) {
+    
+    // Detect the actual platform we're running on
+    function detectPlatform() {
+        const userAgent = navigator.userAgent.toLowerCase();
+        if (userAgent.indexOf('win') !== -1) return 'windows';
+        if (userAgent.indexOf('mac') !== -1) return 'mac';
+        if (userAgent.indexOf('linux') !== -1) return 'linux';
+        return 'unknown';
+    }
+    
+    // Function to perform the real installation process
+    function performRealInstallation(osType, osVersion, softwareList, downloadMode, platform) {
         let currentStep = 0;
         const totalSteps = softwareList.length;
         const accountsToSetup = [];
@@ -260,25 +265,48 @@ document.addEventListener('DOMContentLoaded', function() {
                     accountsToSetup.push('docker');
                 }
                 
-                // In a real implementation, we would download and run the installer
-                // Here we're just simulating it with a delay
-                setTimeout(() => {
-                    // Log installation command that would be used
-                    logMessage(`Installation command: ${installCommands[osType][software]}`);
-                    logMessage(`${software} installed successfully!\n`);
+                // Perform the actual installation using our backend API
+                fetch('/api/install', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        software: software,
+                        osType: osType,
+                        osVersion: osVersion,
+                        downloadUrl: downloadUrl,
+                        downloadMode: downloadMode,
+                        platform: platform
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        logMessage(`Installation command executed: ${data.command}`);
+                        logMessage(`${software} installed successfully!\n`);
+                    } else {
+                        logMessage(`Error installing ${software}: ${data.error}\n`);
+                    }
                     
                     // Move to next software
                     currentStep++;
                     processNextSoftware();
-                }, 2000);
+                })
+                .catch(error => {
+                    logMessage(`Error installing ${software}: ${error.message}\n`);
+                    // Continue with next software despite error
+                    currentStep++;
+                    processNextSoftware();
+                });
             } else {
                 // All software installed
                 updateProgress(100);
                 logMessage('\nAll software installed successfully! Your development environment is ready.');
                 logMessage('You can now start coding!');
                 
-                // If account setup is enabled, prompt for account creation
-                if (document.getElementById('openBrowser').checked && accountsToSetup.length > 0) {
+                // If account setup is enabled, open browser tabs for account creation
+                if (document.getElementById('openBrowser') && document.getElementById('openBrowser').checked && accountsToSetup.length > 0) {
                     setTimeout(() => {
                         logMessage('\nOpening browser tabs for account creation...');
                         openAccountSetupPages(accountsToSetup);
@@ -315,12 +343,8 @@ document.addEventListener('DOMContentLoaded', function() {
             
             logMessage(`Opening signup page for ${account}...`);
             
-            // In a real implementation, this would open a browser tab
-            // For our demo, we'll just log it
-            logMessage(`URL: ${url}`);
-            
-            // This would open a browser tab in a real implementation:
-            // window.open(url, '_blank');
+            // Actually open the browser tab
+            window.open(url, '_blank');
         });
     }
 

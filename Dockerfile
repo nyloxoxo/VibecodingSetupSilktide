@@ -1,19 +1,31 @@
-FROM nginx:alpine
+FROM node:16-alpine
 
-COPY . /usr/share/nginx/html
-WORKDIR /usr/share/nginx/html
+WORKDIR /app
 
-# Configure Nginx to use setup.html as the default page
-RUN echo 'server { \
-    listen 80; \
-    server_name localhost; \
-    location / { \
-        root /usr/share/nginx/html; \
-        index setup.html; \
-        try_files $uri $uri/ /setup.html; \
-    } \
-}' > /etc/nginx/conf.d/default.conf
+# Install dependencies
+RUN apk add --no-cache curl bash sudo
+
+# Copy package files
+COPY package.json package-lock.json* ./
+
+# Create package.json if it doesn't exist
+RUN if [ ! -f package.json ]; then \
+    echo '{"name":"developer-setup-tool","version":"1.0.0","description":"Developer environment setup tool","main":"server.js","scripts":{"start":"node server.js"},"dependencies":{"express":"^4.18.2"}}' > package.json; \
+    fi
+
+# Install dependencies
+RUN npm install
+
+# Copy application files
+COPY . .
+
+# Create temp directory for downloads
+RUN mkdir -p temp && chmod 777 temp
+
+# Create installers directories
+RUN mkdir -p installers/mac installers/windows && chmod -R 777 installers
 
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"] 
+# Command to run the server
+CMD ["node", "server.js"] 
