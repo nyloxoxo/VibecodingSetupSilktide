@@ -71,21 +71,28 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
         
-        // Modify the installation process to use Electron APIs
+        // Get references for installation UI
         const startSetupBtn = document.getElementById('startSetupBtn');
         const installationProgress = document.getElementById('installationProgress');
         const progressBar = document.getElementById('progressBar');
         const progressPercentage = document.getElementById('progressPercentage');
         const installationLogs = document.getElementById('installationLogs');
         
-        startSetupBtn.addEventListener('click', async (event) => {
+        // IMPORTANT: Remove any existing click listeners from the setup button
+        // Clone the node to remove all event listeners
+        const oldStartSetupBtn = startSetupBtn;
+        const newStartSetupBtn = oldStartSetupBtn.cloneNode(true);
+        oldStartSetupBtn.parentNode.replaceChild(newStartSetupBtn, oldStartSetupBtn);
+        
+        // Now add our Electron-specific click handler to the button
+        newStartSetupBtn.addEventListener('click', async (event) => {
             // Validate form (reusing existing validation logic)
             if (validateForm()) {
                 saveUserData();
                 
                 // Start the installation process
-                startSetupBtn.disabled = true;
-                startSetupBtn.textContent = 'Installing...';
+                newStartSetupBtn.disabled = true;
+                newStartSetupBtn.textContent = 'Installing...';
                 installationProgress.style.display = 'block';
                 
                 // Get form data
@@ -93,6 +100,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const osVersion = document.getElementById('os_version').value;
                 const downloadMode = document.querySelector('input[name="download_mode"]:checked').value;
                 const selectedSoftware = Array.from(document.querySelectorAll('input[name="software"]:checked')).map(cb => cb.value);
+                
+                logMessage("Starting Electron installation process...");
+                logMessage(`OS: ${osType} (${osVersion})`);
+                logMessage(`Software: ${selectedSoftware.join(', ')}`);
+                logMessage(`Download mode: ${downloadMode}\n`);
                 
                 // Install the selected software
                 await installSoftwareElectron(osType, osVersion, selectedSoftware, downloadMode);
@@ -132,12 +144,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Update the progress bar
     function updateProgress(percent) {
+        const progressBar = document.getElementById('progressBar');
+        const progressPercentage = document.getElementById('progressPercentage');
         progressBar.style.width = `${percent}%`;
         progressPercentage.textContent = `${percent}%`;
     }
     
     // Log a message to the installation logs
     function logMessage(message) {
+        const installationLogs = document.getElementById('installationLogs');
         installationLogs.textContent += `\n${message}`;
         installationLogs.scrollTop = installationLogs.scrollHeight;
     }
@@ -226,6 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
         logMessage('\nAll software installed successfully! Your development environment is ready.');
         logMessage('You can now start coding!');
         
+        const startSetupBtn = document.getElementById('startSetupBtn');
         startSetupBtn.disabled = false;
         startSetupBtn.textContent = 'Setup Complete';
     }

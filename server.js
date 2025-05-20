@@ -128,24 +128,19 @@ function downloadInstaller(software, url) {
         const request = url.startsWith('https') ? https : http;
         
         request.get(url, (response) => {
-            // Handle redirects
-            if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-                return downloadInstaller(software, response.headers.location);
+            if (response.statusCode !== 200) {
+                reject(new Error(`Failed to download: ${response.statusCode}`));
+                return;
             }
-            
             response.pipe(file);
-            
             file.on('finish', () => {
                 file.close();
-                
                 // Make executable on Unix systems
                 if (process.platform !== 'win32') {
                     fs.chmodSync(installerPath, '755');
                 }
-                
                 resolve(installerPath);
             });
-            
         }).on('error', (err) => {
             fs.unlink(installerPath, () => {}); // Delete the file
             reject(err);

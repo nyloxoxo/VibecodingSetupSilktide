@@ -13,8 +13,8 @@ RUN apk add --no-cache curl bash sudo \
     libxi-dev \
     libxcomposite-dev \
     libxcursor-dev \
-    libasound2 \
-    libgbm-dev
+    alsa-lib \
+    mesa-dev
 
 # Copy package files
 COPY package.json package-lock.json* ./

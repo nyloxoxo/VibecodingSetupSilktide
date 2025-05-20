@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   setup-tool:
     build: .
@@ -15,7 +13,6 @@ services:
       - DISPLAY=:0
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-      - ./:/app
     # For running Electron, we provide an alternative command
     # To run Electron instead of the web server, use:
     # docker-compose run --rm setup-tool ./run-electron.sh 
