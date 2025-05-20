@@ -326,4 +326,19 @@ If you want to include installers with the application (for offline installation
 
 ## Distribution
 
-For distribution, build the application for both macOS and Windows, and provide your users with the appropriate installer for their platform. 
+For distribution, build the application for both macOS and Windows, and provide your users with the appropriate installer for their platform.
+
+# Electron Handoff
+
+## To run Electron locally:
+1. Install dependencies: `npm install`
+2. Start Electron: `npm run electron`
+
+## To build for production:
+- Use electron-builder or similar tools.
+
+## Project Structure:
+- `/electron/main.js` — Electron main process
+- `/electron/preload.js` — Preload script
+- `/public/` — UI (HTML, JS, CSS)
+- `/src/` — Shared logic (optional) 

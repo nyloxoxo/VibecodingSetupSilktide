@@ -5,6 +5,8 @@
   "main": "main.js",
   "scripts": {
     "start": "node server.js",
+    "docker": "docker-compose up -d",
+    "electron": "electron ./electron/main.js",
     "dev": "nodemon server.js",
     "electron-start": "electron .",
     "electron-dev": "electron .",

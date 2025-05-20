@@ -1,6 +1,6 @@
 # Developer Setup Tool
 
-A tool to help beginning developers set up their development environment with a single click.
+A tool to help beginning developers set up their development environment with a single click. This project supports both web-based (Docker/Express) and native desktop (Electron) workflows for maximum flexibility and ease of use.
 
 ## Features
 
@@ -9,6 +9,7 @@ A tool to help beginning developers set up their development environment with a 
 - Option to choose recommended setup or manual selection
 - Web download or bundled installer options
 - Progress tracking and installation logs
+- Runs as a web app (via Docker) or as a native desktop app (via Electron)
 
 ## Included Software
 
@@ -17,15 +18,36 @@ A tool to help beginning developers set up their development environment with a 
 - **Docker** (Optional) - Container platform for application development
 - **Windsurf** (Optional) - Local development environment
 
-## Docker Setup
+## Project Structure
+
+```
+/project-root
+  /electron        # Electron main process and preload scripts
+  /installers      # Bundled installers for offline use (see below)
+  /scripts         # Dev scripts for Docker
+  /temp            # Temporary downloads (auto-created)
+  check-downloads.js
+  docker-compose.yml
+  Dockerfile
+  electron-implementation.md
+  index.html
+  package.json
+  README.md
+  renderer.js
+  setup.js
+  setup.sh / setup.bat
+  styles.css
+```
+
+## Docker Setup (Web App)
 
 The project includes Docker configuration for easy deployment and testing of the web interface.
 
 ### Docker Containers
 
-| Container Name | Image | Description | Ports |
-|----------------|-------|-------------|-------|
-| vibe-setup-tool | vibecodingsetup-setup-tool | Main setup tool web interface | 7654:80 |
+| Container Name    | Image                        | Description                    | Ports   |
+|------------------|------------------------------|--------------------------------|---------|
+| vibe-setup-tool  | vibecodingsetup-setup-tool   | Main setup tool web interface  | 7654:80 |
 
 There are also other containers visible in the environment that may be from other projects:
 - journal_webserver (nginx:alpine) - Port 8000:80
@@ -36,7 +58,7 @@ There are also other containers visible in the environment that may be from othe
 ### Docker Configuration Files
 
 - **docker-compose.yml**: Defines the services and container configuration
-- **Dockerfile**: Simple Nginx-based configuration to serve the web interface
+- **Dockerfile**: Node/Express-based configuration to serve the web interface
 - **.dockerignore**: Excludes unnecessary files from the Docker build
 
 ### Running the Docker Setup
@@ -66,67 +88,47 @@ Once running, access the web interface at:
 http://localhost:7654
 ```
 
-## Implementation Options
+## Electron Desktop App (Advanced)
 
-This repository includes three different implementation options for the Developer Setup Tool:
+For a complete desktop application experience, use Electron. This allows users to:
+- Choose a download location on their own machine
+- Download and install software with privilege escalation
+- Enjoy a native, cross-platform UI
 
-### 1. Web Interface (setup.html)
+**To run Electron locally:**
+1. Install dependencies: `npm install`
+2. Start Electron: `npm run electron`
 
-A simple browser-based UI that demonstrates the concept and simulates installations.
-
-To use:
-1. Open `setup.html` in your web browser
-2. Select your options and click "Start Setup"
-
-Note: This is a simulation only and won't actually install software.
-
-### 2. Native Scripts
-
-Platform-specific scripts for direct installation:
-
-- **Windows**: `setup.bat` - Batch script for Windows systems
-- **macOS**: `setup.sh` - Bash script for macOS systems
-
-To use:
-- Windows: Right-click `setup.bat` and select "Run as administrator"
-- macOS: Open Terminal and run `sudo ./setup.sh`
-
-These scripts can download installers from the web or use bundled installers placed in the `installers` directory.
-
-### 3. Electron Application (Advanced)
-
-For a complete desktop application experience, follow the instructions in `electron-implementation.md` to build a full Electron app.
+**For full Electron handoff and build instructions, see [`electron-implementation.md`](electron-implementation.md).**
 
 ## Using Bundled Installers
 
 If you want to include the installer files with the tool (for offline installation):
 
 1. Place installers in the appropriate directory:
-   - macOS: `installers/mac/`
-   - Windows: `installers/windows/`
+   - macOS: `installers/mac/` (see `installers/mac/README.md` for naming and architecture details)
+   - Windows: `installers/windows/` (see `installers/windows/README.md` for naming and version details)
 
-2. See the README.md in each installer directory for specific naming conventions.
+2. The setup scripts and Electron app will automatically detect and use the correct installer.
 
-## Development
+## Development Workflow
 
-To modify this tool:
-
-1. Web Interface:
-   - Edit `setup.html` to change the UI
-   - Edit `setup.js` to modify the installation logic
-
-2. Native Scripts:
-   - Edit `setup.bat` for Windows changes
-   - Edit `setup.sh` for macOS changes
-
-3. Electron App:
-   - Follow instructions in `electron-implementation.md`
+- **Web UI:**
+  - Edit `index.html`, `renderer.js`, `setup.js`, and `styles.css` for UI and logic changes.
+  - Use Docker for local development/testing of the web interface.
+- **Native Scripts:**
+  - Edit `setup.bat` for Windows or `setup.sh` for macOS for direct script-based installs.
+- **Electron App:**
+  - All Electron code is in `/electron`.
+  - UI is shared with the web version.
+  - See `electron-implementation.md` for details.
 
 ## Security Considerations
 
-- The scripts require administrator/sudo privileges to install applications
+- The scripts and Electron app require administrator/sudo privileges to install applications
 - All downloads use HTTPS from official sources
 - Always verify the integrity of downloaded installers
+- Consider code signing your Electron application for production
 
 ## License
 
